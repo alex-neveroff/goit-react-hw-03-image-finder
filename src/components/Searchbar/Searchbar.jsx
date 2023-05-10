@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Notify } from 'notiflix';
 import { ReactComponent as SearchIcon } from '../../icons/search.svg';
 import PropTypes from 'prop-types';
 import { SearchbarForm, SearchbarHeader } from './Searchbar.styled';
@@ -13,6 +14,11 @@ class Searchbar extends Component {
   handleSubmit = event => {
     event.preventDefault();
     const { query } = this.state;
+    if (query === '') {
+      Notify.warning(`Enter something`);
+      return;
+    }
+
     this.props.onSubmit(query);
   };
 

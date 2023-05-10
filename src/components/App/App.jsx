@@ -8,10 +8,6 @@ import Loader from 'components/Loader/Loader';
 import Button from 'components/Button/Button';
 import Modal from 'components/Modal/Modal';
 
-// 2. Сделать чтобы кнопка не показывалась, когда это последняя страница
-// 3. Сделать лоадер
-// 4. Debounce
-
 class App extends Component {
   state = {
     images: [],
@@ -51,7 +47,7 @@ class App extends Component {
       this.setState(prevState => ({
         images: [...prevState.images, ...hits],
       }));
-      this.showLoadMore(totalHits);
+      this.showLoadMore(totalHits, hits.length);
     } catch (error) {
       Notify.failure(error.message);
     } finally {
@@ -60,6 +56,10 @@ class App extends Component {
   };
 
   handleSubmit = query => {
+    if (query === this.state.query) {
+      Notify.warning(`You are already viewing images for "${query}" `);
+      return;
+    }
     this.setState({
       query: query,
       page: 1,
@@ -84,14 +84,15 @@ class App extends Component {
     }));
   };
 
-  showLoadMore = totalHits => {
+  showLoadMore = (totalHits, hitsLength) => {
     const perPage = getPerPage();
-    const currentPage = this.state.page;
+    const Currentpage = this.state.page;
     const totalPages = Math.ceil(totalHits / perPage);
-    if (currentPage === 1 || totalPages === currentPage) {
+    if (!hitsLength || totalPages === Currentpage) {
       this.setState({ showLoadMore: false });
       return;
     }
+
     this.setState({ showLoadMore: true });
   };
 
