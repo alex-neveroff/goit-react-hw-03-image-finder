@@ -10,7 +10,7 @@ const options = {
   orientation: 'horizontal',
 };
 
-const getImagesByName = async (query, page) => {
+export const getImagesByName = async (query, page) => {
   try {
     const { data } = await axios.get(
       `${BASE_URL}?q=${query}&page=${page}&key=${API_KEY}&image_type=${options.image_type}
@@ -22,4 +22,6 @@ const getImagesByName = async (query, page) => {
   }
 };
 
-export default getImagesByName;
+export const getPerPage = () => {
+  return options.per_page;
+};

@@ -1,16 +1,16 @@
 import React, { Component } from 'react';
 import { Notify } from 'notiflix';
 import { Container } from './App.styled';
-import getImagesByName from 'api/api';
+import { getImagesByName, getPerPage } from 'api/api';
 import Searchbar from 'components/Searchbar/Searchbar';
 import ImageGallery from 'components/ImageGallery/ImageGallery';
 import Loader from 'components/Loader/Loader';
 import Button from 'components/Button/Button';
 import Modal from 'components/Modal/Modal';
 
-// 1. Сделать сообщения о количестве найденного
 // 2. Сделать чтобы кнопка не показывалась, когда это последняя страница
 // 3. Сделать лоадер
+// 4. Debounce
 
 class App extends Component {
   state = {
@@ -18,6 +18,7 @@ class App extends Component {
     query: '',
     page: 1,
     showModal: false,
+    showLoadMore: false,
     largeImage: '',
     alt: '',
     isLoading: false,
@@ -37,10 +38,20 @@ class App extends Component {
 
     try {
       this.setState({ isLoading: true });
-      const { hits } = await getImagesByName(query, page);
+      const { hits, totalHits } = await getImagesByName(query, page);
+      if (page === 1) {
+        if (totalHits === 0) {
+          Notify.warning(`Found nothing for "${query}"`);
+        } else if (totalHits === 1) {
+          Notify.success(`Found only one image for "${query}"`);
+        } else {
+          Notify.success(`Found ${totalHits} images for "${query}"`);
+        }
+      }
       this.setState(prevState => ({
         images: [...prevState.images, ...hits],
       }));
+      this.showLoadMore(totalHits);
     } catch (error) {
       Notify.failure(error.message);
     } finally {
@@ -73,8 +84,21 @@ class App extends Component {
     }));
   };
 
+  showLoadMore = totalHits => {
+    const perPage = getPerPage();
+    const currentPage = this.state.page;
+    const totalPages = Math.ceil(totalHits / perPage);
+    if (currentPage === 1 || totalPages === currentPage) {
+      this.setState({ showLoadMore: false });
+      return;
+    }
+    this.setState({ showLoadMore: true });
+  };
+
   render() {
-    const { images, largeImage, alt, showModal, isLoading } = this.state;
+    const { images, largeImage, alt, showModal, showLoadMore, isLoading } =
+      this.state;
+
     return (
       <Container>
         <Searchbar onSubmit={this.handleSubmit} />
@@ -83,7 +107,7 @@ class App extends Component {
         )}
         {isLoading && <Loader />}
 
-        {images.length > 0 && !isLoading && <Button onClick={this.loadMore} />}
+        {showLoadMore && !isLoading && <Button onClick={this.loadMore} />}
 
         {showModal && (
           <Modal onClose={this.toggleModal}>
