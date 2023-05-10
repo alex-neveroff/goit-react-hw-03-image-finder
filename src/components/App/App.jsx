@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, createRef } from 'react';
 import { Notify } from 'notiflix';
 import { Container } from './App.styled';
 import { getImagesByName, getPerPage } from 'api/api';
@@ -18,7 +18,10 @@ class App extends Component {
     largeImage: '',
     alt: '',
     isLoading: false,
+    imageHeight: 0,
   };
+
+  imageGalleryRef = createRef();
 
   componentDidUpdate(prevProps, prevState) {
     if (prevState.query.toLowerCase() !== this.state.query.toLowerCase()) {
@@ -47,7 +50,7 @@ class App extends Component {
       this.setState(prevState => ({
         images: [...prevState.images, ...hits],
       }));
-      this.showLoadMore(totalHits, hits.length);
+      this.showLoadMoreButton(totalHits, hits.length);
     } catch (error) {
       Notify.failure(error.message);
     } finally {
@@ -84,7 +87,7 @@ class App extends Component {
     }));
   };
 
-  showLoadMore = (totalHits, hitsLength) => {
+  showLoadMoreButton = (totalHits, hitsLength) => {
     const perPage = getPerPage();
     const Currentpage = this.state.page;
     const totalPages = Math.ceil(totalHits / perPage);
