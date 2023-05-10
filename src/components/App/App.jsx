@@ -21,7 +21,7 @@ class App extends Component {
   };
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.query !== this.state.query) {
+    if (prevState.query.toLowerCase() !== this.state.query.toLowerCase()) {
       this.getGallery();
     }
     if (prevState.page < this.state.page) {
@@ -56,7 +56,7 @@ class App extends Component {
   };
 
   handleSubmit = query => {
-    if (query === this.state.query) {
+    if (query.toLowerCase() === this.state.query.toLowerCase()) {
       Notify.warning(`You are already viewing images for "${query}" `);
       return;
     }
