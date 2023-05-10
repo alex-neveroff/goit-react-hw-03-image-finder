@@ -71,7 +71,8 @@ class App extends Component {
   };
 
   handleImageClick = (largeImageURL, tags) => {
-    this.setState({ largeImage: largeImageURL, alt: tags });
+    this.setState({ largeImage: largeImageURL, alt: tags, isLoading: true });
+
     this.toggleModal();
   };
 
@@ -99,6 +100,10 @@ class App extends Component {
     this.setState({ showLoadMore: true });
   };
 
+  imageLoaded = () => {
+    this.setState({ isLoading: false });
+  };
+
   render() {
     const { images, largeImage, alt, showModal, showLoadMore, isLoading } =
       this.state;
@@ -115,7 +120,13 @@ class App extends Component {
 
         {showModal && (
           <Modal onClose={this.toggleModal}>
-            <img className="modal-content" src={largeImage} alt={alt} />
+            {isLoading && <Loader />}
+            <img
+              className="modal-content"
+              src={largeImage}
+              alt={alt}
+              onLoad={this.imageLoaded}
+            />
           </Modal>
         )}
       </Container>
