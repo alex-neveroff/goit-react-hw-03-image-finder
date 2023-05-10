@@ -10,7 +10,7 @@ function ImageGalleryItem({ image, onClick }) {
         className="galery-image"
         src={webformatURL}
         alt={tags}
-        onClick={() => onClick(largeImageURL)}
+        onClick={() => onClick(largeImageURL, tags)}
       />
     </GalleryItem>
   );

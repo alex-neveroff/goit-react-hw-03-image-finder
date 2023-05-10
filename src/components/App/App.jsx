@@ -8,66 +8,88 @@ import Loader from 'components/Loader/Loader';
 import Button from 'components/Button/Button';
 import Modal from 'components/Modal/Modal';
 
+// 1. Сделать сообщения о количестве найденного
+// 2. Сделать чтобы кнопка не показывалась, когда это последняя страница
+// 3. Сделать лоадер
+
 class App extends Component {
   state = {
     images: [],
     query: '',
     page: 1,
-    isModalOpen: false,
+    showModal: false,
     largeImage: '',
+    alt: '',
+    isLoading: false,
   };
 
   componentDidUpdate(prevProps, prevState) {
     if (prevState.query !== this.state.query) {
       this.getGallery();
     }
+    if (prevState.page < this.state.page) {
+      this.getGallery();
+    }
   }
-
-  handleSubmit = query => {
-    this.setState({ query: query });
-  };
 
   getGallery = async () => {
     const { query, page } = this.state;
 
     try {
+      this.setState({ isLoading: true });
       const { hits } = await getImagesByName(query, page);
       this.setState(prevState => ({
         images: [...prevState.images, ...hits],
       }));
     } catch (error) {
       Notify.failure(error.message);
+    } finally {
+      this.setState({ isLoading: false });
     }
   };
 
-  handleImageClick = largeImageURL => {
-    this.setState({ largeImage: largeImageURL });
+  handleSubmit = query => {
+    this.setState({
+      query: query,
+      page: 1,
+      images: [],
+    });
+  };
+
+  handleImageClick = (largeImageURL, tags) => {
+    this.setState({ largeImage: largeImageURL, alt: tags });
+    this.toggleModal();
   };
 
   toggleModal = () => {
-    this.setState(({ isModalOpen }) => ({
-      isModalOpen: !isModalOpen,
+    this.setState(({ showModal }) => ({
+      showModal: !showModal,
     }));
+  };
 
-    if (this.state.isModalOpen) {
-      this.setState({
-        largeImage: '',
-      });
-    }
+  loadMore = () => {
+    this.setState(prevState => ({
+      page: prevState.page + 1,
+    }));
   };
 
   render() {
-    const { images, largeImage } = this.state;
+    const { images, largeImage, alt, showModal, isLoading } = this.state;
     return (
       <Container>
         <Searchbar onSubmit={this.handleSubmit} />
         {images && (
           <ImageGallery images={images} onClick={this.handleImageClick} />
         )}
+        {isLoading && <Loader />}
 
-        <Loader />
-        <Button />
-        <Modal image={largeImage} onClose={this.toggleModal} />
+        {images.length > 0 && !isLoading && <Button onClick={this.loadMore} />}
+
+        {showModal && (
+          <Modal onClose={this.toggleModal}>
+            <img className="modal-content" src={largeImage} alt={alt} />
+          </Modal>
+        )}
       </Container>
     );
   }
