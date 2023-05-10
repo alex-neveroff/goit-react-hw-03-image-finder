@@ -13,6 +13,8 @@ class App extends Component {
     images: [],
     query: '',
     page: 1,
+    isModalOpen: false,
+    largeImage: '',
   };
 
   componentDidUpdate(prevProps, prevState) {
@@ -38,16 +40,34 @@ class App extends Component {
     }
   };
 
+  handleImageClick = largeImageURL => {
+    this.setState({ largeImage: largeImageURL });
+  };
+
+  toggleModal = () => {
+    this.setState(({ isModalOpen }) => ({
+      isModalOpen: !isModalOpen,
+    }));
+
+    if (this.state.isModalOpen) {
+      this.setState({
+        largeImage: '',
+      });
+    }
+  };
+
   render() {
-    const { images } = this.state;
+    const { images, largeImage } = this.state;
     return (
       <Container>
         <Searchbar onSubmit={this.handleSubmit} />
-        {images && <ImageGallery images={images} />}
+        {images && (
+          <ImageGallery images={images} onClick={this.handleImageClick} />
+        )}
 
         <Loader />
         <Button />
-        <Modal />
+        <Modal image={largeImage} onClose={this.toggleModal} />
       </Container>
     );
   }

@@ -1,8 +1,13 @@
 import React, { Component } from 'react';
+import { ModalWindow, Overlay } from './Modal.styled';
 
 export class Modal extends Component {
   render() {
-    return <div></div>;
+    return (
+      <Overlay>
+        <ModalWindow />
+      </Overlay>
+    );
   }
 }
 
